@@ -1,50 +1,20 @@
-name: CI Security
+name: Continuos Deployment
 
 on:
   push:
-    branches: [ desarrollo ]
-  workflow_dispatch:
-
+    branches:
+      - desarrollo
+      
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
+  deploy:
+    runs-on: self-hosted
     steps:
-      - name: Checkout código
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Instalar dependencias
-        run: npm install
-
-      - name: Ejecutar tests
-        run: node ./node_modules/jest/bin/jest.js
-
-      - name: SAST con Semgrep
+      - name: Build and run Docker container
         run: |
-          pip install semgrep
-          semgrep --config=auto
-
-      - name: Escaneo de dependencias
-        run: npm audit || true
-
-      - name: Iniciar aplicacion
-        run: |
-          npm start &
-          sleep 90
-          curl -I http://localhost:3001 || true
-
-      - name: Ejecutar Zap Scan
-        uses: zaproxy/action-baseline@v0.15.0
-        with:
-          target: '-r report_html.html' 
-
-      - name: Subir reporte
-        uses: actions/upload-artifact@v4
-        with:
-          name: ZAP-Report
-          path: report_html.html
+          docker stop mini-secure-app || true
+          docker rm mini-secure-app || true
+          docker build -t mini-secure-app .
+          docker run -d --name mini-secure-app -p 3001:3001 mini secure app
