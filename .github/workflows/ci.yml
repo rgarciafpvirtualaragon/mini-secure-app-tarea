@@ -44,7 +44,7 @@ jobs:
           target: '-r report_html.html' 
 
       - name: Subir reporte
-        uses: action/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: ZAP-Report
           path: report_html.html
